@@ -15,7 +15,7 @@ def sim_pearson(prefs,p1,p2):
     p1_item = prefs[p1]
     p2_item = prefs[p2]
 
-    n = MAX_ARTIST_VALUE
+    n = len(p1_item)
 
     # calculate p's variance
     ave1 = sum([it for it in p1_item])/float(n)
@@ -33,7 +33,7 @@ def sim_pearson(prefs,p1,p2):
     return cov/(var1*var2)
 
 def create_data():
-    print 'Generate user_artists data.....'
+    print 'Generate user_artists data.'
     u_num, a_num = (MAX_USER_VALUE, MAX_ARTIST_VALUE) # x, y coordinate
     count, maxCount, maxArtistCount = (0,0,0)
 
@@ -43,17 +43,17 @@ def create_data():
         itemlist[2] = itemlist[2].replace('\r\n','') # ex. itemlist = [3,22,23] / [user,artist,count]
         if count >= 1:
             if count == 1:
-                itemArray = numpy.array(itemlist)
+                item_array = numpy.array(itemlist)
             else:
-                itemArray = numpy.vstack((itemArray,itemlist))
-    print itemArray
+                item_array = numpy.vstack((item_array,itemlist))
+    print item_array
 
-    matrix = numpy.zeros([u_num,a_num],dtype=numpy.float64)
+    matrix = numpy.zeros([u_num,a_num],dtype=numpy.float)
 
     for j in xrange(count):
-        userid = itemArray[j][0]
-        artistid = itemArray[j][1]
-        weight = itemArray[j][2]
+        userid = item_array[j][0]
+        artistid = item_array[j][1]
+        weight = item_array[j][2]
         if weight != 0:
             matrix[int(userid)-1, int(artistid)-1] = float(weight)
 
@@ -65,7 +65,7 @@ def create_data():
 def getRecommendations(prefs,person,similarity=sim_pearson):
     totals = {}
     simSums = {}
-    n = MAX_ARTIST_VALUE
+    n = len(prefs[1])
 
     for other in xrange(MAX_USER_VALUE):
         if other == person: continue
@@ -93,15 +93,17 @@ if __name__ == "__main__":
     MAX_USER_VALUE = 2100
 
     argvs = sys.argv
-    print argvs
     if (len(argvs) != 2):
         print 'Input userID after %s' % argvs[0]
         quit()
     else:
-        print 'Calculate the songs recommended for userID = %s' % argvs[1]
+        print 'Calculate the artists recommended for userID = %s' % argvs[1]
 
     x = create_data()
-    print x
-    result = getRecommendations(x, 12, sim_pearson)
+    target_user = int(argvs[1])
+    result = getRecommendations(x, target_user , sim_pearson)
     rank = result[:20]
-    print rank
+    ranking_num = 0
+    for recommend_artist in rank:
+        ranking_num += 1
+        print 'No.%s Recommended artistsID is %s, sim_pearson_value is %s' % (ranking_num, recommend_artist[1], recommend_artist[0])
